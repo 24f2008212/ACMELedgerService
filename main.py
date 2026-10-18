@@ -202,7 +202,9 @@ def filter_orders(question: str) -> list[dict]:
         selected = [r for r in selected if r["status"] == "refunded"]
     elif re.search(r"\b(void|voided|cancelled|canceled)\b", qn):
         selected = [r for r in selected if r["status"] == "void"]
-    elif re.search(r"\b(revenue|sales|sold|spent|spend|turnover|income)\b", qn):
+    elif re.search(r"\b(paid|revenue|sales|sold|spent|spend|turnover|income)\b", qn):
+        # Explicit "paid orders only" must filter by status even when the
+        # question asks for a count of customers rather than revenue.
         selected = [r for r in selected if r["status"] == "paid"]
 
     return selected
