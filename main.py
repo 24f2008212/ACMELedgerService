@@ -221,7 +221,7 @@ def aggregate_metric(rows: list[dict], q: str) -> Decimal | int:
     currency = requested_currency(q)
 
     if re.search(r"\b(average|avg|mean)\b", qn) and re.search(
-        r"\b(order value|order amount|revenue|sales|spend|spent)\b", qn
+        r"\b(order value|order amount|order worth|worth|revenue|sales|spend|spent)\b", qn
     ):
         paid = [r for r in rows if r["status"] == "paid"]
         if not paid:
