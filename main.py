@@ -202,7 +202,7 @@ def filter_orders(question: str) -> list[dict]:
         selected = [r for r in selected if r["status"] == "refunded"]
     elif re.search(r"\b(void|voided|cancelled|canceled)\b", qn):
         selected = [r for r in selected if r["status"] == "void"]
-    elif re.search(r"\b(paid|revenue|sales|sold|spent|spend|turnover|income)\b", qn):
+    elif re.search(r"\b(paid|revenue|sales|sold|spent|spend|turnover|income|earn|earned)\b", qn):
         # Explicit "paid orders only" must filter by status even when the
         # question asks for a count of customers rather than revenue.
         selected = [r for r in selected if r["status"] == "paid"]
@@ -242,7 +242,7 @@ def aggregate_metric(rows: list[dict], q: str) -> Decimal | int:
         return len({r["customer"] for r in rows})
 
     # Revenue is paid orders only; refund questions are filtered to refunded orders.
-    if any(word in qn for word in ["revenue", "sales", "turnover", "income", "spent", "spend", "amount", "value", "refund"]):
+    if any(word in qn for word in ["revenue", "sales", "turnover", "income", "earn", "earned", "spent", "spend", "amount", "value", "refund"]):
         return sum((money_for(r, currency) for r in rows), Decimal("0"))
 
     if re.search(r"\b(units|items|quantity)\b", qn):
@@ -268,7 +268,7 @@ def answer_question(question: str):
 
     # Questions asking for the top/bottom item should return its API spelling/ID.
     wants_top = bool(re.search(r"\b(top|most|highest|largest|best|greatest|maximum)\b", qn))
-    wants_bottom = bool(re.search(r"\b(least|lowest|smallest|fewest|minimum)\b", qn))
+    wants_bottom = bool(re.search(r"\b(least|lowest|smallest|fewest|minimum)\b", qn)) and not bool(re.search(r"\bat least\b", qn))
     dimension = None
     if re.search(r"\b(product|products|item|items)\b", qn) and re.search(r"\b(which|what|top|most|highest|best|least|lowest|popular)\b", qn):
         dimension = "product"
@@ -300,7 +300,7 @@ def answer_question(question: str):
             groups[r[grouping]].append(r)
         if re.search(r"\b(refund|refunded|refunds)\b", qn):
             metric = lambda rs: round_money(sum((money_for(r, currency) for r in rs), Decimal("0")))
-        elif re.search(r"\b(revenue|sales|spent|spend|amount|value|turnover|income)\b", qn):
+        elif re.search(r"\b(revenue|sales|spent|spend|amount|value|turnover|income|earn|earned)\b", qn):
             metric = lambda rs: round_money(sum((money_for(r, currency) for r in rs), Decimal("0")))
         elif re.search(r"\b(quantity|units|items)\b", qn):
             metric = lambda rs: sum(r["_qty"] for r in rs)
